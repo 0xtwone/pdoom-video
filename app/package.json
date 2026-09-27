@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "still-becoming",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -14,7 +14,15 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
+    "@fontsource/noto-sans-sc": "^5.3.0",
     "opentype.js": "^2.0.0",
     "three": "^0.186.0"
+  },
+  "scripts": {
+    "dev": "bun --bun vite",
+    "build": "bun --bun vite build",
+    "typecheck": "tsc --noEmit",
+    "score": "bun scripts/score.ts",
+    "render": "bun scripts/render.ts video --fps 30 --samples 4 --shutter 0.2 --out ../out/still-becoming.mp4"
   }
 }

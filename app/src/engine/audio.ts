@@ -42,8 +42,8 @@ export class AudioData {
     this.onsets = j.onsets ?? {};
   }
 
-  static async load(): Promise<AudioData> {
-    for (const url of ['data/audio.json', 'data/audio.approx.json']) {
+  static async load(source?: string): Promise<AudioData> {
+    for (const url of source ? [source] : ['data/audio.json', 'data/audio.approx.json']) {
       const r = await fetch(url);
       if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) return new AudioData(await r.json());
     }

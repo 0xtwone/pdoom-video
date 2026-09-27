@@ -1,9 +1,15 @@
+import '@fontsource/noto-sans-sc/400.css';
 // Entry: preview player (default) or export mode (?export=1, driven by scripts/render.ts).
 import { Engine, type AdaptiveSampling } from './engine/engine';
 import { PW, PH, SCALE } from './engine/gl';
 import { makeTimeline } from './timeline';
+import { makeHopeTimeline } from './hope/timeline';
+import { STORY } from './hope/story';
 
 const params = new URLSearchParams(location.search);
+const ORIGINAL = params.get('film') === 'original';
+const audioPath = ORIGINAL ? 'audio/pdoom.mp3' : 'audio/still-becoming.mp3';
+document.title = ORIGINAL ? "I'm Upping My P(doom)" : '再次，成为自己 · Still Becoming';
 const EXPORT = params.has('export');
 const ONLY = params.get('only'); // comma-separated scene ids to load (faster stills)
 const FROM = params.get('t') ? parseFloat(params.get('t')!) : null;
@@ -13,7 +19,8 @@ const canvas = document.getElementById('c') as HTMLCanvasElement;
 canvas.width = PW;
 canvas.height = PH;
 
-const engine = new Engine(canvas, makeTimeline);
+const engine = new Engine(canvas, ORIGINAL ? makeTimeline : makeHopeTimeline,
+  ORIGINAL ? {} : { audio: 'data/hope-audio.json', lyrics: 'data/hope-text.json' });
 
 declare global {
   interface Window { __pdoom: any }
@@ -35,6 +42,7 @@ function setupExport() {
   window.__pdoom = {
     engine,
     duration: engine.duration,
+    audioPath,
     errors: engine.errors,
     /** Output size in px (1920x1080 times scale); stream() sends frames of width*height*4 bytes. */
     scale: SCALE,
@@ -91,11 +99,13 @@ function setupExport() {
     },
   };
   window.__pdoom.ready = true;
+  if (params.has('job')) import('./hope/capture').then(({ captureJob }) => captureJob(window.__pdoom, params.get('job')!)).catch(console.error);
 }
 
 // ------------------------------------------------------------------ preview player
 function setupPlayer() {
-  const audio = new Audio('audio/pdoom.mp3');
+  document.getElementById('film-title')!.textContent = ORIGINAL ? "I'm Upping My P(doom) · Original" : '再次，成为自己 · 72 秒像素短片';
+  const audio = new Audio(audioPath);
   audio.preload = 'auto';
   const ui = document.getElementById('ui')!;
   const scrub = document.getElementById('scrub') as HTMLInputElement;
@@ -112,7 +122,7 @@ function setupPlayer() {
     m.style.left = `${(e.start / engine.duration) * 100}%`;
     m.style.width = `${((e.end - e.start) / engine.duration) * 100}%`;
     m.title = `${e.id} ${e.start.toFixed(2)}–${e.end.toFixed(2)}`;
-    m.textContent = e.id;
+    m.textContent = ORIGINAL ? e.id : STORY.find(s => s.id === e.id)?.label ?? e.id;
     m.onclick = () => seek(e.start);
     marks.appendChild(m);
   }
@@ -124,8 +134,16 @@ function setupPlayer() {
   const seek = (x: number) => { t = Math.max(0, Math.min(engine.duration - 0.001, x)); audio.currentTime = t; };
   seek(t);
 
-  const toggle = () => { playing = !playing; if (playing) { audio.currentTime = t; audio.play(); } else audio.pause(); };
+  const toggle = () => {
+    playing = !playing;
+    if (playing) {
+      if (t >= engine.duration - 0.05) seek(0);
+      audio.currentTime = t;
+      audio.play().catch((error) => { playing = false; errs.textContent = `无法播放音频：${error.message}`; errs.style.display = 'block'; });
+    } else audio.pause();
+  };
   canvas.onclick = toggle;
+  document.getElementById('play')!.onclick = toggle;
   scrub.oninput = () => seek(parseFloat(scrub.value));
   window.addEventListener('keydown', (ev) => {
     if (ev.key === ' ') { ev.preventDefault(); toggle(); }
@@ -160,6 +178,11 @@ function setupPlayer() {
     const e = TIMELINE.find((x) => t >= x.start && t < x.end);
     const l = engine.lyrics.lineAt(t);
     info.textContent = `${t.toFixed(2)}s  beat ${engine.audio.beatAt(t).toFixed(2)}  bar ${engine.audio.barAt(t).toFixed(2)}  [${e?.id ?? '—'}]  ${fps.toFixed(0)}fps   ${l ? '“' + l.text + '”' : ''}${loop ? '  LOOP' : ''}`;
+    if (!ORIGINAL) {
+      const time = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
+      info.textContent = `${time(t)} / ${time(engine.duration)}  ·  ${STORY.find(s => s.id === e?.id)?.label ?? ''}  ·  ${l?.text ?? ''}`;
+    }
+    document.getElementById('play')!.textContent = playing ? '暂停' : '播放';
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);

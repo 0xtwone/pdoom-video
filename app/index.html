@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<title>I'm Upping My P(doom)</title>
+<title>再次，成为自己 · Still Becoming</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   :root { color-scheme: dark; }
   html, body { margin: 0; height: 100%; background: #050505; color: #eee9df; font: 12px/1.4 ui-monospace, Menlo, monospace; overflow: hidden; }
-  #wrap { position: absolute; inset: 0 0 64px 0; display: flex; align-items: center; justify-content: center; }
+  #wrap { position: absolute; inset: 0 0 98px 0; display: flex; align-items: center; justify-content: center; }
   #c { max-width: 100%; max-height: 100%; aspect-ratio: 16/9; background: #000; cursor: pointer; }
-  #ui { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; padding: 6px 12px; box-sizing: border-box; background: #0b0b0c; }
-  #ui.hidden { display: none; } #ui.hidden ~ #wrap { bottom: 0; }
+  #ui { position: absolute; left: 0; right: 0; bottom: 0; height: 98px; padding: 8px 18px; box-sizing: border-box; background: #0b0b0c; }
+  #ui.hidden { display: none; } body:has(#ui.hidden) #wrap { bottom: 0; }
   #scrub { width: 100%; margin: 0; accent-color: #ff4d12; }
   #marks { position: relative; height: 16px; }
   .mark { position: absolute; top: 0; height: 14px; border-left: 1px solid #ff4d12; color: #9c978f; font-size: 9px; overflow: hidden; white-space: nowrap; padding-left: 2px; cursor: pointer; box-sizing: border-box; }
@@ -20,13 +20,15 @@
   body.export #ui, body.export #errs { display: none !important; }
   body.export #wrap { inset: 0; }
   body.export #c { width: 1920px; height: 1080px; max-width: none; max-height: none; }
+.player-row { display:flex; gap:14px; align-items:center; height:30px; } .hint { margin-left:auto; color:#9c978f; } #play { border:1px solid #8d4b2d; border-radius:3px; background:#21130d; color:#ffb96c; padding:3px 16px; cursor:pointer; } @media(max-width:700px){.hint{display:none;}}
 </style>
 </head>
 <body>
 <div id="wrap"><canvas id="c"></canvas></div>
 <div id="ui">
+  <div class="player-row"><button id="play" type="button">播放</button><span id="film-title">再次，成为自己 · 72 秒像素短片</span><span class="hint">点击画面 / 空格播放 · ← → 跳转 · H 隐藏控制栏</span></div>
   <div id="marks"></div>
-  <input id="scrub" type="range" min="0" value="0" />
+  <input id="scrub" type="range" min="0" value="0" aria-label="视频进度" />
   <div id="info"></div>
 </div>
 <pre id="errs"></pre>
