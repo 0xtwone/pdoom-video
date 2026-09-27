@@ -4,6 +4,8 @@ A generative, code-rendered music video with word-synced karaoke typography. Eve
 
 **Watch it in 4K on YouTube:** https://www.youtube.com/watch?v=5EoO5413dBY
 
+The YouTube upload is an earlier render: it averages only 4 sub-frames per frame for motion blur, so fast motion shows stepped copies, and YouTube's compression smears the film grain. For the best version, render it locally (see [Render the video](#render-the-video)): the current code picks up to 324 sub-frames per frame where the motion needs them.
+
 The video was made with Claude (Opus 5.5) in Claude Code: the concept and treatment, the lyric alignment and audio analysis, the renderer, every scene and the renders were all worked out in conversation with Claude.
 
 The song is not ours: see [Credits](#credits) for who wrote and made it.
